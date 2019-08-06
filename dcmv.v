@@ -18,8 +18,8 @@ fn main() {
     print_grid(grid)
     grid[6][9] = 1
     print_grid(grid)
-    //add_cells(mut grid, living_cells)
-    //print_grid(grid)
+    add_cells(mut grid, living_cells)
+    print_grid(grid)
     
     println(living_cells.join(' ')) 
     living_cells = new_cycle(living_cells)
@@ -195,7 +195,6 @@ fn init_grid(length int, size int) []array_int {
         a << [0; length]
     }
     return a
-    //return [[1; length]; size]
 }
 
 fn add_cells(grid mut []array_int, living_cells []Point) {
@@ -206,10 +205,10 @@ fn add_cells(grid mut []array_int, living_cells []Point) {
         x = cell.x
         y = cell.y
         println('cell : ${cell.str()}')
-        //grid[int(y)][int(x)] = 1
-        grid[3][9] = 1
-        print_grid(grid)
-        break
+        grid[int(y)][int(x)] = 1
+        //grid[3][9] = 1
+        //print_grid(grid)
+        //break
     }
 }
 
