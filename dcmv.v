@@ -1,8 +1,12 @@
+import time
+import os
+
 const (
     MaxCells   = 100
     MaxLength  = 30
     MaxHeight  = 30
     LivingCell = 'O'
+    SleepingTime = 100
 )
 
 struct Point {
@@ -15,18 +19,21 @@ mut:
 fn main() {
     mut living_cells := set_of_cells()
     mut grid := init_grid(MaxLength, MaxHeight)
-    print_grid(grid)
-    grid[6][9] = 1
-    print_grid(grid)
-    add_cells(mut grid, living_cells)
-    print_grid(grid)
     
-    println(living_cells.join(' ')) 
-    living_cells = new_cycle(living_cells)
-    //add_cells(mut grid, living_cells)
-    println(living_cells.join(' ')) 
-    living_cells = new_cycle(living_cells)
-    println(living_cells.join(' ')) 
+    print_grid(grid)
+    time.sleep_ms(100)
+    os.clear()
+
+    for i:= 0; i!=100; i++ {
+        living_cells = new_cycle(living_cells)
+        add_cells(mut grid, living_cells)
+        print_grid(grid)
+        os.clear()
+        /*if os.get_line() != 'No' {
+            break
+        }*/
+        time.sleep_ms(100)
+    }
 }
 
 /**********************/
@@ -198,23 +205,19 @@ fn init_grid(length int, size int) []array_int {
 }
 
 fn add_cells(grid mut []array_int, living_cells []Point) {
+    *grid = init_grid(MaxLength, MaxHeight)
     mut x := u8(0)
     mut y := u8(0)
 
     for cell in living_cells {
         x = cell.x
         y = cell.y
-        println('cell : ${cell.str()}')
         grid[int(y)][int(x)] = 1
-        //grid[3][9] = 1
-        //print_grid(grid)
-        //break
     }
 }
 
 fn print_grid(grid []array_int) {
-    for i, line in grid {
-        print('$i :')
+    for line in grid {
         for cell in line {
             if cell == 0 { print(' ') }
             else { print('O') }
