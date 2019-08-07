@@ -6,6 +6,7 @@ const (
     MaxLength  = 30
     MaxHeight  = 30
     LivingCell = 'O'
+    Empty   = ' '
     SleepingTime = 100
 )
 
@@ -18,7 +19,7 @@ mut:
 
 fn main() {
     mut living_cells := set_of_cells()
-    mut grid := init_grid(MaxLength, MaxHeight)
+    mut grid := init_grid()
     
     print_grid(grid)
     time.sleep_ms(100)
@@ -136,10 +137,23 @@ fn set_of_cells() []Point {
     return cells
 }
 
+fn out_of_bounds(cells mut []Point) {
+    mut c := cells[0]
+    for i := 0; i != cells.len; i++ {
+        c = cells[i]
+        if !(c.x >= u8(0) && c.x < u8(MaxLength) && c.y >= u8(0) && c.y < u8(MaxHeight)) {
+            cells.delete(i)
+            i--
+        }
+    }
+}
+
 
 
 fn surrounding_cells(c Point) []Point {
-    mut neighbours := [Point { x: u8(c.x - u8(1)), y: u8(c.y - u8(1)) }]
+    mut neighbours := []Point
+    
+    neighbours << Point { x: u8(c.x - u8(1)), y: u8(c.y - u8(1)) }
     neighbours << Point { x: u8(c.x - u8(1)), y: u8(c.y) }
     neighbours << Point { x: u8(c.x - u8(1)), y: u8(c.y + u8(1)) }
     neighbours << Point { x: u8(c.x), y: u8(c.y - u8(1)) }
@@ -180,6 +194,10 @@ fn all_dead_neighbours(living_cells []Point) []Point {
         neighbours.uniq()
     }
 
+    /* Check the neighbours are not out of the grid bounds
+    if so, they are removed */
+    out_of_bounds(mut neighbours)
+
     return neighbours - living_cells
 }
 
@@ -196,16 +214,16 @@ fn all_living_neighbours(living_cells []Point, p Point) []Point {
 /*                        */
 /**************************/
 
-fn init_grid(length int, size int) []array_int {
+fn init_grid() []array_int {
     mut a := []array_int
-    for i := 0; i != size; i++ {
-        a << [0; length]
+    for i := 0; i != MaxHeight; i++ {
+        a << [0; MaxLength]
     }
     return a
 }
 
 fn add_cells(grid mut []array_int, living_cells []Point) {
-    *grid = init_grid(MaxLength, MaxHeight)
+    *grid = init_grid()
     mut x := u8(0)
     mut y := u8(0)
 
@@ -219,8 +237,8 @@ fn add_cells(grid mut []array_int, living_cells []Point) {
 fn print_grid(grid []array_int) {
     for line in grid {
         for cell in line {
-            if cell == 0 { print(' ') }
-            else { print('O') }
+            if cell == 0 { print(Empty) }
+            else { print(LivingCell) }
         }
         println('')
     }
