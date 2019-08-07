@@ -14,13 +14,16 @@ const (
     MaxWidth  = 30
     MaxHeight  = 30
     LivingCell = 'O'
-    Empty   = ' '
+    DeadCell   = ' '
     SleepingTime = 100
     Living = gx.rgb(0, 110, 194)
     BlockSize = 10
     LivingCellColor = gx.Red
-    WindowWidth = MaxWidth * BlockSize
-    WindowHeight = MaxHeight * BlockSize
+    DeadCellColor   = gx.White
+    VerticalBorder = 50
+    HorizontalBorder = 50
+    WindowWidth = MaxWidth * BlockSize + HorizontalBorder * 2
+    WindowHeight = MaxHeight * BlockSize + VerticalBorder * 2
 )
 
 /* Structs */
@@ -97,6 +100,7 @@ fn (p1 Point) eql(p2 Point) bool {
     return p1.x == p2.x && p1.y == p2.y
 }
 
+// Will be implemented in V
 fn (p1 []Point) - (p2 []Point) []Point {
     mut res := []Point
 
@@ -109,9 +113,11 @@ fn (p1 []Point) - (p2 []Point) []Point {
     return res
 }
 
+// Will be implemented in V
 fn (pts mut []Point) uniq() {
     for i, pt in *pts {
-        /* Since we're deleting, this for loop is necessary */
+        /* Since we're deleting, this for loop is necessary, because
+        The index i doesn't fallback on other for syntaxes */
         for j := i + 1; j < pts.len; j++ {
             if pt.eql(pts[j]) {
                 pts.delete(j)
@@ -121,13 +127,14 @@ fn (pts mut []Point) uniq() {
     }
 }
 
+// Will be implemented in V
 fn (p1 []Point) inter(p2 []Point) []Point {
     mut pts1 := p1
     mut pts2 := p2
     mut res := []Point
 
     /* We can't call uniq() on the loops, because
-    the loops use then then return value (and uniq()
+    the loops use then the return value (and uniq()
     returns void) */
     pts1.uniq()
     pts2.uniq()
@@ -144,6 +151,7 @@ fn (p1 []Point) inter(p2 []Point) []Point {
     return res
 }
 
+// Will be implemented in V
 fn (p1 []Point) contains(p2 Point) bool {
     for p in p1 {
         if p2.eql(p) {
@@ -170,6 +178,7 @@ fn (p Point) str() string {
     return 'x : ' + p.x.str() + '; y : ' + p.y.str() + ';'
 }
 
+// Will be implemented in V
 fn (pts []Point) join(sub string) string {
     mut res := ''
 
@@ -185,14 +194,17 @@ fn (pts []Point) join(sub string) string {
 
 fn set_of_cells() []Point {
     mut cells := []Point
+
     cells << Point { x: 9, y: 20 }
     cells << Point { x: 10, y: 20 }
     cells << Point { x: 11, y: 20 }
+
     return cells
 }
 
 fn out_of_bounds(cells mut []Point) {
     mut c := cells[0]
+
     for i := 0; i != cells.len; i++ {
         c = cells[i]
         if !(c.x >= 0 && c.x < MaxWidth && c.y >= 0 && c.y < MaxHeight) {
@@ -248,7 +260,7 @@ fn all_dead_neighbours(living_cells []Point) []Point {
         neighbours.uniq()
     }
 
-    /* Check the neighbours are not out of the grid bounds
+    /* Check the neighbours are NOT out of the grid bounds
     if so, they are removed */
     out_of_bounds(mut neighbours)
 
@@ -256,9 +268,8 @@ fn all_dead_neighbours(living_cells []Point) []Point {
 }
 
 
-fn all_living_neighbours(living_cells []Point, p Point) []Point {
-    neighbours := surrounding_cells(p)
-    return neighbours.inter(living_cells)
+fn all_living_neighbours(living_cells []Point, cell Point) []Point {
+    return surrounding_cells(cell).inter(living_cells)
 }
 
 
@@ -270,9 +281,11 @@ fn all_living_neighbours(living_cells []Point, p Point) []Point {
 
 fn init_grid() []array_int {
     mut a := []array_int
+
     for i := 0; i != MaxHeight; i++ {
         a << [0; MaxWidth]
     }
+
     return a
 }
 
@@ -295,7 +308,7 @@ fn add_cells(grid mut []array_int, living_cells []Point) {
 fn print_grid(grid []array_int) {
     for line in grid {
         for cell in line {
-            if cell == 0 { print(Empty) }
+            if cell == 0 { print(DeadCell) }
             else { print(LivingCell) }
         }
         println('')
@@ -305,26 +318,48 @@ fn print_grid(grid []array_int) {
 
 /**************************/
 /*                        */
-/*         WINDOW         */
+/*          GUI           */
 /*                        */
 /**************************/
 
-// clear is not working, moreover color value is useless in function call (see source code)
+// clear is not working, moreover color value is useless in
+// function call (see source code)
 fn clear_window(g mut gg.GG, c gx.Color) {
     g.draw_rect(0, 0, WindowWidth, WindowHeight, c)
     g.render()
 }
 
 
-fn print_cells(g mut gg.GG, grid []array_int) {
-    for l, line in grid {
-        for c, cell in line {
-            if cell == 0 {
-                g.draw_rect(c * BlockSize - 1, l * BlockSize - 1, BlockSize + 1, BlockSize + 1, gx.White)
+fn print_cells(g mut gg.GG, grid []array_int)
+{
+    mut x := 0
+    mut y := 0
+    mut cell_size := 0
+    mut cell_color := gx.White
+
+    for l, line in grid
+    {
+        for c, cell in line
+        {
+            x = c * BlockSize + HorizontalBorder
+            y = l * BlockSize + HorizontalBorder
+
+            if cell == 0
+            {
+                x--
+                y--
+                cell_size = BlockSize + 1
+                cell_color = DeadCellColor
             }
-            else {
-                g.draw_rect(c * BlockSize + 1, l * BlockSize + 1, BlockSize - 1, BlockSize - 1, LivingCellColor)
+            else
+            {
+                x++
+                y++
+                cell_size = BlockSize - 1
+                cell_color = LivingCellColor
             }
+
+            g.draw_rect(x, y, cell_size, cell_size, cell_color)
         }
     }
     g.render()
