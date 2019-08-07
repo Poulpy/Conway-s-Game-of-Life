@@ -11,14 +11,15 @@ import glfw
 /* Constants */
 
 const (
-    MaxLength  = 30
+    MaxWidth  = 30
     MaxHeight  = 30
     LivingCell = 'O'
     Empty   = ' '
     SleepingTime = 100
     Living = gx.rgb(0, 110, 194)
     BlockSize = 10
-    WindowWidth = MaxLength * BlockSize
+    LivingCellColor = gx.Red
+    WindowWidth = MaxWidth * BlockSize
     WindowHeight = MaxHeight * BlockSize
 )
 
@@ -37,6 +38,8 @@ fn main() {
     mut grid := init_grid()
     living_cells = new_cycle(living_cells)
     add_cells(mut grid, living_cells)
+
+    // GUI
     glfw.init()
     mut game := gg.new_context(gg.Cfg {
         width: WindowWidth
@@ -47,31 +50,38 @@ fn main() {
         window_user_ptr: game
     })
     game.window.set_user_ptr(game)
-
-
     clear_window(mut game, gx.White)
-    game.draw_rect(1,20,2,20,gx.Red)
-    game.render()
 
-    time.sleep_ms(SleepingTime * 100)
+
+
+
+
+    print_cells(mut game, grid)
+    time.sleep_ms(100)
+
+    for i:= 0; i!=10; i++ {
+        living_cells = new_cycle(living_cells)
+
+        /* Window */
+        add_cells(mut grid, living_cells)
+        print_cells(mut game, grid)
+        time.sleep_ms(SleepingTime)
+    }
     game.window.destroy()
 
+    // CLI
     /*
     print_grid(grid)
-    time.sleep_ms(100)
+    time.sleep_ms(SleepingTime)
     os.clear()
 
     for i:= 0; i!=100; i++ {
         living_cells = new_cycle(living_cells)
 
-        /* CLI */
         add_cells(mut grid, living_cells)
         print_grid(grid)
         os.clear()
         time.sleep_ms(SleepingTime)
-        /*if os.get_line() != 'No' {
-            break
-        }*/
     }*/
 }
 
@@ -185,7 +195,7 @@ fn out_of_bounds(cells mut []Point) {
     mut c := cells[0]
     for i := 0; i != cells.len; i++ {
         c = cells[i]
-        if !(c.x >= 0 && c.x < MaxLength && c.y >= 0 && c.y < MaxHeight) {
+        if !(c.x >= 0 && c.x < MaxWidth && c.y >= 0 && c.y < MaxHeight) {
             cells.delete(i)
             i--
         }
@@ -261,7 +271,7 @@ fn all_living_neighbours(living_cells []Point, p Point) []Point {
 fn init_grid() []array_int {
     mut a := []array_int
     for i := 0; i != MaxHeight; i++ {
-        a << [0; MaxLength]
+        a << [0; MaxWidth]
     }
     return a
 }
@@ -302,5 +312,21 @@ fn print_grid(grid []array_int) {
 // clear is not working, moreover color value is useless in function call (see source code)
 fn clear_window(g mut gg.GG, c gx.Color) {
     g.draw_rect(0, 0, WindowWidth, WindowHeight, c)
+    g.render()
+}
+
+
+fn print_cells(g mut gg.GG, grid []array_int) {
+    for l, line in grid {
+        for c, cell in line {
+            if cell == 0 {
+                g.draw_rect(c * BlockSize - 1, l * BlockSize - 1, BlockSize + 1, BlockSize + 1, gx.White)
+            }
+            else {
+                g.draw_rect(c * BlockSize + 1, l * BlockSize + 1, BlockSize - 1, BlockSize - 1, LivingCellColor)
+            }
+        }
+    }
+    g.render()
 }
 
