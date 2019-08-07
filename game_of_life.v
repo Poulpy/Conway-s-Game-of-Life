@@ -1,5 +1,9 @@
+/* Imports */
+
 import time
 import os
+
+/* Constants */
 
 const (
     MaxLength  = 30
@@ -9,12 +13,15 @@ const (
     SleepingTime = 100
 )
 
+/* Structs */
+
 struct Point {
 mut:
     x u8
     y u8
 }
 
+/* Main */
 
 fn main() {
     mut living_cells := set_of_cells()
@@ -26,13 +33,15 @@ fn main() {
 
     for i:= 0; i!=100; i++ {
         living_cells = new_cycle(living_cells)
+        
+        /* CLI */
         add_cells(mut grid, living_cells)
         print_grid(grid)
         os.clear()
+        time.sleep_ms(SleepingTime)
         /*if os.get_line() != 'No' {
             break
         }*/
-        time.sleep_ms(SleepingTime)
     }
 }
 
@@ -100,6 +109,8 @@ fn (p1 []Point) contains(p2 Point) bool {
 
     return false
 }
+
+/* Debug functions */
 
 fn (pts []Point) str() string {
     mut res := ''
@@ -232,6 +243,8 @@ fn add_cells(grid mut []array_int, living_cells []Point) {
         grid[int(y)][int(x)] = 1
     }
 }
+
+/* CLI */
 
 fn print_grid(grid []array_int) {
     for line in grid {
