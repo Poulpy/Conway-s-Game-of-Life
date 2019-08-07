@@ -17,8 +17,8 @@ const (
 
 struct Point {
 mut:
-    x u8
-    y u8
+    x int
+    y int
 }
 
 /* Main */
@@ -141,9 +141,9 @@ fn (pts []Point) join(sub string) string {
 
 fn set_of_cells() []Point {
     mut cells := []Point
-    cells << Point { x: u8(9), y: u8(20) }
-    cells << Point { x: u8(10), y: u8(20) }
-    cells << Point { x: u8(11), y: u8(20) }
+    cells << Point { x: 9, y: 20 }
+    cells << Point { x: 10, y: 20 }
+    cells << Point { x: 11, y: 20 }
     return cells
 }
 
@@ -151,7 +151,7 @@ fn out_of_bounds(cells mut []Point) {
     mut c := cells[0]
     for i := 0; i != cells.len; i++ {
         c = cells[i]
-        if !(c.x >= u8(0) && c.x < u8(MaxLength) && c.y >= u8(0) && c.y < u8(MaxHeight)) {
+        if !(c.x >= 0 && c.x < MaxLength && c.y >= 0 && c.y < MaxHeight) {
             cells.delete(i)
             i--
         }
@@ -163,32 +163,32 @@ fn out_of_bounds(cells mut []Point) {
 fn surrounding_cells(c Point) []Point {
     mut neighbours := []Point
     
-    neighbours << Point { x: u8(c.x - u8(1)), y: u8(c.y - u8(1)) }
-    neighbours << Point { x: u8(c.x - u8(1)), y: u8(c.y) }
-    neighbours << Point { x: u8(c.x - u8(1)), y: u8(c.y + u8(1)) }
-    neighbours << Point { x: u8(c.x), y: u8(c.y - u8(1)) }
-    neighbours << Point { x: u8(c.x), y: u8(c.y + u8(1)) }
-    neighbours << Point { x: u8(c.x + u8(1)), y: u8(c.y - u8(1)) }
-    neighbours << Point { x: u8(c.x + u8(1)), y: u8(c.y) }
-    neighbours << Point { x: u8(c.x + u8(1)), y: u8(c.y + u8(1)) }
+    neighbours << Point { x: c.x - 1, y: c.y - 1 }
+    neighbours << Point { x: c.x - 1, y: c.y }
+    neighbours << Point { x: c.x - 1, y: c.y + 1 }
+    neighbours << Point { x: c.x, y: c.y - 1 }
+    neighbours << Point { x: c.x, y: c.y + 1 }
+    neighbours << Point { x: c.x + 1, y: c.y - 1 }
+    neighbours << Point { x: c.x + 1, y: c.y }
+    neighbours << Point { x: c.x + 1, y: c.y + 1 }
 
     return neighbours
 }
 
 fn new_cycle(living_cells []Point) []Point {
     mut new_cells := []Point
-    mut count := u8(0)
+    mut count := 0
     
     for i := 0; i != living_cells.len; i++ {
-        count = u8(all_living_neighbours(living_cells, living_cells[i]).len)
+        count = all_living_neighbours(living_cells, living_cells[i]).len
 
-        if count == u8(2) || count == u8(3) {
+        if count == 2 || count == 3 {
             new_cells << living_cells[i]
         }
     }
 
     for dead_cell in all_dead_neighbours(living_cells) {
-        if u8(all_living_neighbours(living_cells, dead_cell).len) == u8(3) {
+        if all_living_neighbours(living_cells, dead_cell).len == 3 {
             new_cells << dead_cell
         }
     }
@@ -234,13 +234,13 @@ fn init_grid() []array_int {
 
 fn add_cells(grid mut []array_int, living_cells []Point) {
     *grid = init_grid()
-    mut x := u8(0)
-    mut y := u8(0)
+    mut x := 0
+    mut y := 0
 
     for cell in living_cells {
         x = cell.x
         y = cell.y
-        grid[int(y)][int(x)] = 1
+        grid[y][x] = 1
     }
 }
 
