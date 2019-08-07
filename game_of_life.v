@@ -2,6 +2,11 @@
 
 import time
 import os
+import gx
+import gl
+import gg
+import glfw
+
 
 /* Constants */
 
@@ -11,6 +16,10 @@ const (
     LivingCell = 'O'
     Empty   = ' '
     SleepingTime = 100
+    Living = gx.rgb(0, 110, 194)
+    BlockSize = 10
+    WindowWidth = MaxLength * BlockSize
+    WindowHeight = MaxHeight * BlockSize
 )
 
 /* Structs */
@@ -26,14 +35,35 @@ mut:
 fn main() {
     mut living_cells := set_of_cells()
     mut grid := init_grid()
-    
+    living_cells = new_cycle(living_cells)
+    add_cells(mut grid, living_cells)
+    glfw.init()
+    mut game := gg.new_context(gg.Cfg {
+        width: WindowWidth
+        height: WindowHeight
+        use_ortho: true
+        create_window: true
+        window_title: 'Game of Life'
+        window_user_ptr: game
+    })
+    game.window.set_user_ptr(game)
+
+
+    clear_window(mut game, gx.White)
+    game.draw_rect(1,20,2,20,gx.Red)
+    game.render()
+
+    time.sleep_ms(SleepingTime * 100)
+    game.window.destroy()
+
+    /*
     print_grid(grid)
     time.sleep_ms(100)
     os.clear()
 
     for i:= 0; i!=100; i++ {
         living_cells = new_cycle(living_cells)
-        
+
         /* CLI */
         add_cells(mut grid, living_cells)
         print_grid(grid)
@@ -42,7 +72,7 @@ fn main() {
         /*if os.get_line() != 'No' {
             break
         }*/
-    }
+    }*/
 }
 
 /**********************/
@@ -76,9 +106,9 @@ fn (pts mut []Point) uniq() {
             if pt.eql(pts[j]) {
                 pts.delete(j)
                 j--
-            } 
+            }
         }
-    } 
+    }
 }
 
 fn (p1 []Point) inter(p2 []Point) []Point {
@@ -86,7 +116,7 @@ fn (p1 []Point) inter(p2 []Point) []Point {
     mut pts2 := p2
     mut res := []Point
 
-    /* We can't call uniq() on the loops, because 
+    /* We can't call uniq() on the loops, because
     the loops use then then return value (and uniq()
     returns void) */
     pts1.uniq()
@@ -166,7 +196,7 @@ fn out_of_bounds(cells mut []Point) {
 
 fn surrounding_cells(c Point) []Point {
     mut neighbours := []Point
-    
+
     neighbours << Point { x: c.x - 1, y: c.y - 1 }
     neighbours << Point { x: c.x - 1, y: c.y }
     neighbours << Point { x: c.x - 1, y: c.y + 1 }
@@ -182,7 +212,7 @@ fn surrounding_cells(c Point) []Point {
 fn new_cycle(living_cells []Point) []Point {
     mut new_cells := []Point
     mut count := 0
-    
+
     for cell in living_cells {
         count = all_living_neighbours(living_cells, cell).len
 
@@ -260,5 +290,17 @@ fn print_grid(grid []array_int) {
         }
         println('')
     }
+}
+
+
+/**************************/
+/*                        */
+/*         WINDOW         */
+/*                        */
+/**************************/
+
+// clear is not working, moreover color value is useless in function call (see source code)
+fn clear_window(g mut gg.GG, c gx.Color) {
+    g.draw_rect(0, 0, WindowWidth, WindowHeight, c)
 }
 
