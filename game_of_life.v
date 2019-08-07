@@ -71,6 +71,7 @@ fn (p1 []Point) - (p2 []Point) []Point {
 
 fn (pts mut []Point) uniq() {
     for i, pt in *pts {
+        /* Since we're deleting, this for loop is necessary */
         for j := i + 1; j < pts.len; j++ {
             if pt.eql(pts[j]) {
                 pts.delete(j)
@@ -85,6 +86,9 @@ fn (p1 []Point) inter(p2 []Point) []Point {
     mut pts2 := p2
     mut res := []Point
 
+    /* We can't call uniq() on the loops, because 
+    the loops use then then return value (and uniq()
+    returns void) */
     pts1.uniq()
     pts2.uniq()
 
@@ -179,11 +183,11 @@ fn new_cycle(living_cells []Point) []Point {
     mut new_cells := []Point
     mut count := 0
     
-    for i := 0; i != living_cells.len; i++ {
-        count = all_living_neighbours(living_cells, living_cells[i]).len
+    for cell in living_cells {
+        count = all_living_neighbours(living_cells, cell).len
 
         if count == 2 || count == 3 {
-            new_cells << living_cells[i]
+            new_cells << cell
         }
     }
 
@@ -233,6 +237,7 @@ fn init_grid() []array_int {
 }
 
 fn add_cells(grid mut []array_int, living_cells []Point) {
+    /* mut is a pointer, so we need a * to deref it */
     *grid = init_grid()
     mut x := 0
     mut y := 0
@@ -240,6 +245,7 @@ fn add_cells(grid mut []array_int, living_cells []Point) {
     for cell in living_cells {
         x = cell.x
         y = cell.y
+        /* x and y needs to be mutable ?! */
         grid[y][x] = 1
     }
 }
