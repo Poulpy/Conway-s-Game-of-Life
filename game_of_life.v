@@ -2,7 +2,6 @@ import time
 import os
 
 const (
-    MaxCells   = 100
     MaxLength  = 30
     MaxHeight  = 30
     LivingCell = 'O'
@@ -33,7 +32,7 @@ fn main() {
         /*if os.get_line() != 'No' {
             break
         }*/
-        time.sleep_ms(100)
+        time.sleep_ms(SleepingTime)
     }
 }
 
