@@ -42,6 +42,9 @@ fn main() {
     living_cells = new_cycle(living_cells)
     add_cells(mut grid, living_cells)
 
+    read_csv('cells.csv')
+
+    /*
     // GUI
     glfw.init()
     mut game := gg.new_context(gg.Cfg {
@@ -65,12 +68,12 @@ fn main() {
     for i:= 0; i!=10; i++ {
         living_cells = new_cycle(living_cells)
 
-        /* Window */
         add_cells(mut grid, living_cells)
         print_cells(mut game, grid)
         time.sleep_ms(SleepingTime)
     }
     game.window.destroy()
+    */
 
     // CLI
     /*
@@ -200,6 +203,14 @@ fn set_of_cells() []Point {
     cells << Point { x: 11, y: 20 }
 
     return cells
+}
+
+fn read_csv(file_path string) {
+    f:= os.read_file(file_path) or {
+        panic(err)
+        return
+    }
+    println(f)
 }
 
 fn out_of_bounds(cells mut []Point) {
