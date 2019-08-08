@@ -12,18 +12,21 @@ import strings
 /* Constants */
 
 const (
-    MaxWidth  = 50
+    MaxWidth   = 50
     MaxHeight  = 20
+
     LivingCell = 'O'
     DeadCell   = ' '
-    SleepingTime = 1000
-    Living = gx.rgb(0, 110, 194)
-    BlockSize = 10
     LivingCellColor = gx.Red
     DeadCellColor   = gx.White
-    VerticalBorder = 50
-    HorizontalBorder = 50
-    WindowWidth = MaxWidth * BlockSize + HorizontalBorder * 2
+
+    SleepingTime = 1000
+    BlockSize = 10
+
+    VerticalBorder   = 100
+    HorizontalBorder = 100
+
+    WindowWidth  = MaxWidth * BlockSize + HorizontalBorder * 2
     WindowHeight = MaxHeight * BlockSize + VerticalBorder * 2
 )
 
@@ -38,13 +41,54 @@ mut:
 /* Main */
 
 fn main() {
-    //mut living_cells := set_of_cells()
-    mut living_cells := read_csv('cells.csv')
+    mut living_cells := []Point
     mut grid := init_grid()
+    file_name := file_in_args()
+
+    if file_name == '' {
+        living_cells = set_of_cells()
+    }
+    else {
+        living_cells = read_csv(file_name)
+    }
+
     add_cells(mut grid, living_cells)
 
+    if living_cells.len == 0 { return }
 
-    // GUI
+
+    if check_console_arg() {
+        cli_game(mut grid, mut living_cells)
+    }
+    else {
+        gui_game(mut grid, mut living_cells)
+    }
+}
+
+
+fn check_console_arg() bool {
+    for arg in os.args {
+        if arg.substr(1, 2) == 'c' {
+            return true
+        }
+    }
+    return false
+}
+
+// v run game_of_life.v -f=cells.csv
+fn file_in_args() string {
+    for arg in os.args {
+        if arg.substr(1, 2) == 'f' {
+            // Taking out the filename
+            return arg.substr(3, arg.len)
+        }
+    }
+
+    return ''
+}
+
+fn gui_game(grid mut []array_int, living_cells mut []Point)
+{
     glfw.init()
     mut game := gg.new_context(gg.Cfg {
         width: WindowWidth
@@ -57,28 +101,30 @@ fn main() {
     game.window.set_user_ptr(game)
     clear_window(mut game, gx.White)
 
-    for i := 0; i != 10; i++ {
+    for i := 0; i != 10; i++
+    {
         print_cells(mut game, grid)
         time.sleep_ms(SleepingTime)
-        living_cells = new_cycle(living_cells)
+        *living_cells = new_cycle(living_cells)
         if living_cells.len == 0 { break }
 
         add_cells(mut grid, living_cells)
     }
     game.window.destroy()
+}
 
-
-    // CLI
-    /*
-    for i:= 0; i != 10; i++ {
+fn cli_game(grid mut []array_int, living_cells mut []Point)
+{
+    for i:= 0; i != 10; i++
+    {
         os.clear()
         print_grid(grid)
         time.sleep_ms(SleepingTime)
-        living_cells = new_cycle(living_cells)
+        *living_cells = new_cycle(living_cells)
         if living_cells.len == 0 { break }
 
         add_cells(mut grid, living_cells)
-    }*/
+    }
 }
 
 /**********************/
@@ -188,9 +234,11 @@ fn (pts []Point) join(sub string) string {
 fn set_of_cells() []Point {
     mut cells := []Point
 
-    cells << Point { x: 9, y: 20 }
-    cells << Point { x: 10, y: 20 }
-    cells << Point { x: 11, y: 20 }
+    cells << Point { x: 9, y: 2 }
+    cells << Point { x: 10, y: 2 }
+    cells << Point { x: 11, y: 2 }
+
+    out_of_bounds(mut cells)
 
     return cells
 }
@@ -355,12 +403,27 @@ fn clear_window(g mut gg.GG, c gx.Color) {
 }
 
 
+fn borders(g mut gg.GG, space int, c gx.Color) {
+    upper_left   := Point { x: HorizontalBorder - space, y: VerticalBorder - space }
+    upper_right  := Point { x: WindowWidth - HorizontalBorder + space, y: VerticalBorder - space }
+    bottom_right := Point { x: WindowWidth - HorizontalBorder + space, y: WindowHeight - VerticalBorder + space }
+    bottom_left  := Point { x: HorizontalBorder - space, y: WindowHeight - VerticalBorder + space }
+
+    g.draw_line_c(upper_left.x, upper_left.y, upper_right.x, upper_right.y, c)
+    g.draw_line_c(upper_left.x, upper_left.y, bottom_left.x, bottom_left.y, c)
+    g.draw_line_c(upper_right.x, upper_right.y, bottom_right.x, bottom_right.y, c)
+    g.draw_line_c(bottom_left.x, bottom_left.y, bottom_right.x, bottom_right.y, c)
+}
+
+
 fn print_cells(g mut gg.GG, grid []array_int)
 {
     mut x := 0
     mut y := 0
     mut cell_size := 0
     mut cell_color := gx.White
+
+    borders(mut g, 2, gx.Black)
 
     for l, line in grid
     {
