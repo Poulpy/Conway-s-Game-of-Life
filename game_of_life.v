@@ -6,16 +6,17 @@ import gx
 import gl
 import gg
 import glfw
+import strings
 
 
 /* Constants */
 
 const (
-    MaxWidth  = 30
-    MaxHeight  = 30
+    MaxWidth  = 50
+    MaxHeight  = 20
     LivingCell = 'O'
     DeadCell   = ' '
-    SleepingTime = 100
+    SleepingTime = 1000
     Living = gx.rgb(0, 110, 194)
     BlockSize = 10
     LivingCellColor = gx.Red
@@ -37,14 +38,12 @@ mut:
 /* Main */
 
 fn main() {
-    mut living_cells := set_of_cells()
+    //mut living_cells := set_of_cells()
+    mut living_cells := read_csv('cells.csv')
     mut grid := init_grid()
-    living_cells = new_cycle(living_cells)
     add_cells(mut grid, living_cells)
 
-    read_csv('cells.csv')
 
-    /*
     // GUI
     glfw.init()
     mut game := gg.new_context(gg.Cfg {
@@ -58,36 +57,27 @@ fn main() {
     game.window.set_user_ptr(game)
     clear_window(mut game, gx.White)
 
-
-
-
-
-    print_cells(mut game, grid)
-    time.sleep_ms(100)
-
-    for i:= 0; i!=10; i++ {
-        living_cells = new_cycle(living_cells)
-
-        add_cells(mut grid, living_cells)
+    for i := 0; i != 10; i++ {
         print_cells(mut game, grid)
         time.sleep_ms(SleepingTime)
+        living_cells = new_cycle(living_cells)
+        if living_cells.len == 0 { break }
+
+        add_cells(mut grid, living_cells)
     }
     game.window.destroy()
-    */
+
 
     // CLI
     /*
-    print_grid(grid)
-    time.sleep_ms(SleepingTime)
-    os.clear()
-
-    for i:= 0; i!=100; i++ {
+    for i:= 0; i != 10; i++ {
+        os.clear()
+        print_grid(grid)
+        time.sleep_ms(SleepingTime)
         living_cells = new_cycle(living_cells)
+        if living_cells.len == 0 { break }
 
         add_cells(mut grid, living_cells)
-        print_grid(grid)
-        os.clear()
-        time.sleep_ms(SleepingTime)
     }*/
 }
 
@@ -205,12 +195,29 @@ fn set_of_cells() []Point {
     return cells
 }
 
-fn read_csv(file_path string) {
-    f:= os.read_file(file_path) or {
+// Existing CSV module
+fn read_csv(file_path string) []Point {
+    mut cells := []Point
+    mut x := 0
+    mut y := 0
+
+    f := os.read_file(file_path) or {
         panic(err)
-        return
+        return []Point
     }
-    println(f)
+
+    points := f.split('\n')
+
+    for p in points {
+        // p[0] returns the ASCII CODE, and not the char
+        x = p.substr(0, 1).int()// char 0
+        y = p.substr(2, 3).int()// char 2
+        cells << Point { x: x, y: y }
+    }
+
+    out_of_bounds(mut cells)
+
+    return cells
 }
 
 fn out_of_bounds(cells mut []Point) {
@@ -317,13 +324,20 @@ fn add_cells(grid mut []array_int, living_cells []Point) {
 /* CLI */
 
 fn print_grid(grid []array_int) {
+    // Top border
+    println(strings.repeat(byte(42), MaxWidth + 2))
+
     for line in grid {
+        print('*')
         for cell in line {
             if cell == 0 { print(DeadCell) }
             else { print(LivingCell) }
         }
-        println('')
+        println('*')
     }
+
+    // Bottom border
+    println(strings.repeat(byte(42), MaxWidth + 2))
 }
 
 
