@@ -1,2 +1,6 @@
-fns.txt
-.*
+*
+
+!*.v
+!*.csv
+!README*
+
