@@ -60,24 +60,18 @@ fn main() {
 
     if living_cells.len == 0 { return }
 
-    cli_curse_game(mut grid, mut living_cells)
 
-    /*if check_console_arg() {
+    if check_console_arg() {
         cli_game(mut grid, mut living_cells)
     }
     else {
         gui_game(mut grid, mut living_cells)
-    }*/
+    }
 }
 
 
 fn check_console_arg() bool {
-    for arg in os.args {
-        if arg.substr(1, 2) == 'c' {
-            return true
-        }
-    }
-    return false
+    return '-c' in os.args
 }
 
 // v run game_of_life.v -f=cells.csv
@@ -118,26 +112,12 @@ fn gui_game(grid mut []array_int, living_cells mut []Point)
     game.window.destroy()
 }
 
-fn cli_curse_game(grid mut []array_int, living_cells mut []Point) {
+fn cli_game(grid mut []array_int, living_cells mut []Point) {
     C.initscr()
     C.noecho()
+
     for i:= 0; i != 10; i++
     {
-        print_curse_grid(grid)
-        time.sleep_ms(SleepingTime)
-        *living_cells = new_cycle(living_cells)
-        if living_cells.len == 0 { break }
-
-        add_cells(mut grid, living_cells)
-    }
-    C.endwin()
-}
-
-fn cli_game(grid mut []array_int, living_cells mut []Point)
-{
-    for i:= 0; i != 10; i++
-    {
-        os.clear()
         print_grid(grid)
         time.sleep_ms(SleepingTime)
         *living_cells = new_cycle(living_cells)
@@ -145,6 +125,8 @@ fn cli_game(grid mut []array_int, living_cells mut []Point)
 
         add_cells(mut grid, living_cells)
     }
+
+    C.endwin()
 }
 
 /**********************/
@@ -359,11 +341,7 @@ fn all_living_neighbours(living_cells []Point, cell Point) []Point {
 }
 
 
-/**************************/
-/*                        */
-/*          GRID          */
-/*                        */
-/**************************/
+/* Grid functions */
 
 fn init_grid() []array_int {
     mut a := []array_int
@@ -389,42 +367,35 @@ fn add_cells(grid mut []array_int, living_cells []Point) {
     }
 }
 
-/* CLI */
 
-fn print_grid(grid []array_int) {
-    // Top border
-    println(strings.repeat(byte(42), MaxWidth + 2))
 
-    for line in grid {
-        print('*')
-        for cell in line {
-            if cell == 0 { print(DeadCell) }
-            else { print(LivingCell) }
-        }
-        println('*')
+/**************************/
+/*                        */
+/*          CLI           */
+/*                        */
+/**************************/
+
+fn print_grid(grid []array_int)
+{
+    for i:=0; i != MaxWidth + 2; i++
+    {
+        C.mvprintw(0, i, '*')
+        C.mvprintw(MaxHeight + 1, i, '*')
     }
 
-    // Bottom border
-    println(strings.repeat(byte(42), MaxWidth + 2))
-}
-
-
-/**************************/
-/*                        */
-/*         CURSE          */
-/*                        */
-/**************************/
-
-fn print_curse_grid(grid []array_int)
-{
     for y, line in grid
     {
+        C.mvprintw(y + 1, 0, '*')
+
         for x, cell in line
         {
-            if cell == 0 { C.mvprintw(y, x, '.') }
-            else { C.mvprintw(y, x, 'O') }
+            if cell == 0 { C.mvprintw(y + 1, x + 1, '.') }
+            else { C.mvprintw(y + 1, x + 1, 'O') }
         }
+
+        C.mvprintw(y + 1, MaxWidth + 1, '*')
     }
+
     C.refresh()
 }
 
