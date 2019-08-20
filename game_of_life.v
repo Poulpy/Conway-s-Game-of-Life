@@ -59,20 +59,10 @@ fn main() {
     }
 
     grid = add_cells(living_cells)
-    //println('TRUC')
-    $if debug {
-        for l in grid {
-            for c in l {
-                print('$c')
-            }
-            println('')
-        }
-    }
+
     if living_cells.len == 0 { return }
 
-
     if has_console_arg() {
-
         cli_game(mut grid, mut living_cells)
     }
     else {
@@ -113,7 +103,6 @@ fn gui_game(grid mut []array_int, living_cells mut []Point)
 
     for i := 0; i != 10; i++
     {
-        // println('x : ${game.window.get_cursor_pos().x} ; y : ${game.window.get_cursor_pos().y}')
         print_cells(mut game, grid)
         time.sleep_ms(SleepingTime)
         *living_cells = new_cycle(living_cells)
@@ -124,18 +113,8 @@ fn gui_game(grid mut []array_int, living_cells mut []Point)
     game.window.destroy()
 }
 
-fn cli_game(grid mut []array_int, living_cells mut []Point) {
-
-    $if debug {
-        for l in *grid {
-            for c in l {
-                print('$c')
-            }
-            println('')
-        }
-    }
-    //println('AAAA')
-    time.sleep_ms(5000)
+fn cli_game(grid mut []array_int, living_cells mut []Point)
+{
     C.initscr()
     C.noecho()
 
@@ -143,12 +122,8 @@ fn cli_game(grid mut []array_int, living_cells mut []Point) {
     {
         print_grid(grid)
         time.sleep_ms(SleepingTime)
-        //println(living_cells.len)
         *living_cells = new_cycle(living_cells)
-        //println(living_cells.len)
-        if living_cells.len == 0 { //println('break')
-        time.sleep_ms(5000)
-         break }
+        if living_cells.len == 0 { break }
 
         *grid = add_cells(living_cells)
     }
@@ -280,8 +255,6 @@ fn set_of_cells() []Point {
 
 fn random_set_of_cells(nbr int) []Point {
     mut pts := []Point
-    //mut x := 0
-    //mut y := 0
     mut pt := Point { x: 0, y: 0 }
 
     rand.seed(time.now().uni)
@@ -289,17 +262,10 @@ fn random_set_of_cells(nbr int) []Point {
     {
         pt.x = rand.next(MaxWidth - 1)
         pt.y = rand.next(MaxHeight - 1)
-        //pt = Point { x: x, y: y }
-        //println('x : $pt.x; y : $pt.y')
 
-
-        if pts.contains(pt) || pt.is_out_of_bounds() { //println('continue')
-         continue }
+        if pts.contains(pt) || pt.is_out_of_bounds() { continue }
         pts << pt
     }
-
-    //out_of_bounds(mut pts)
-    //println(pts.len)
 
     return pts
 }
@@ -328,6 +294,7 @@ fn read_csv(file_path string) []Point {
     return cells
 }
 
+// TODO: rename the function
 fn out_of_bounds(cells mut []Point) {
     mut c := cells[0]
 
@@ -367,7 +334,6 @@ fn new_cycle(living_cells []Point) []Point {
         count = all_living_neighbours(living_cells, cell).len
 
         if count == 2 || count == 3 {
-            //println('new cell')
             new_cells << cell
         }
     }
@@ -375,11 +341,9 @@ fn new_cycle(living_cells []Point) []Point {
     for dead_cell in all_dead_neighbours(living_cells) {
         if all_living_neighbours(living_cells, dead_cell).len == 3 {
             new_cells << dead_cell
-            //println('new dead cell')
         }
     }
 
-    //println('$new_cells.len')
     return new_cells
 }
 
@@ -417,7 +381,6 @@ fn init_grid() []array_int {
 }
 
 fn add_cells(living_cells []Point) []array_int {
-    /* mut is a pointer, so we need a * to deref it */
     grid := init_grid()
     mut x := 0
     mut y := 0
@@ -425,21 +388,11 @@ fn add_cells(living_cells []Point) []array_int {
     for cell in living_cells {
         x = cell.x
         y = cell.y
-        //println('x = $x; y = $y')
         /* x and y needs to be mutable ?! */
         grid[y][x] = 1
-        //println(grid[y][x])
     }
-    //println('right after')
-    $if debug {
-        for l in grid {
-            for c in l {
-                print('$c')
-            }
-            println('')
-        }
-    }
-return grid
+
+    return grid
 }
 
 
@@ -452,9 +405,7 @@ return grid
 
 fn print_grid(grid []array_int)
 {
-
-    //println('BBB')
-    for i:=0; i != MaxWidth + 2; i++
+    for i := 0; i != MaxWidth + 2; i++
     {
         C.mvprintw(0, i, '*')
         C.mvprintw(MaxHeight + 1, i, '*')
