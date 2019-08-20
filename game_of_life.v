@@ -7,6 +7,7 @@ import gl
 import gg
 import glfw
 import strings
+import rand
 
 #flag -lncurses
 #include "curses.h"
@@ -18,6 +19,7 @@ import strings
 const (
     MaxWidth   = 50
     MaxHeight  = 20
+    MaxCells   = MaxWidth * MaxHeight
 
     LivingCell = 'O'
     DeadCell   = ' '
@@ -27,8 +29,8 @@ const (
     SleepingTime = 1000
     BlockSize = 10
 
-    VerticalBorder   = 100
-    HorizontalBorder = 100
+    VerticalBorder   = 0
+    HorizontalBorder = 0
 
     WindowWidth  = MaxWidth * BlockSize + HorizontalBorder * 2
     WindowHeight = MaxHeight * BlockSize + VerticalBorder * 2
@@ -47,21 +49,30 @@ mut:
 fn main() {
     mut living_cells := []Point
     mut grid := init_grid()
-    file_name := file_in_args()
+    file_name := has_file_arg()
 
     if file_name == '' {
-        living_cells = set_of_cells()
+        living_cells = random_set_of_cells(60)// set_of_cells()
     }
     else {
         living_cells = read_csv(file_name)
     }
 
-    add_cells(mut grid, living_cells)
-
+    grid = add_cells(living_cells)
+    //println('TRUC')
+    $if debug {
+        for l in grid {
+            for c in l {
+                print('$c')
+            }
+            println('')
+        }
+    }
     if living_cells.len == 0 { return }
 
 
-    if check_console_arg() {
+    if has_console_arg() {
+
         cli_game(mut grid, mut living_cells)
     }
     else {
@@ -70,12 +81,12 @@ fn main() {
 }
 
 
-fn check_console_arg() bool {
+fn has_console_arg() bool {
     return '-c' in os.args
 }
 
 // v run game_of_life.v -f=cells.csv
-fn file_in_args() string {
+fn has_file_arg() string {
     for arg in os.args {
         if arg.substr(1, 2) == 'f' {
             // Taking out the filename
@@ -102,28 +113,44 @@ fn gui_game(grid mut []array_int, living_cells mut []Point)
 
     for i := 0; i != 10; i++
     {
+        // println('x : ${game.window.get_cursor_pos().x} ; y : ${game.window.get_cursor_pos().y}')
         print_cells(mut game, grid)
         time.sleep_ms(SleepingTime)
         *living_cells = new_cycle(living_cells)
         if living_cells.len == 0 { break }
 
-        add_cells(mut grid, living_cells)
+        *grid = add_cells(living_cells)
     }
     game.window.destroy()
 }
 
 fn cli_game(grid mut []array_int, living_cells mut []Point) {
+
+    $if debug {
+        for l in *grid {
+            for c in l {
+                print('$c')
+            }
+            println('')
+        }
+    }
+    //println('AAAA')
+    time.sleep_ms(5000)
     C.initscr()
     C.noecho()
 
-    for i:= 0; i != 10; i++
+    for i := 0; i != 10; i++
     {
         print_grid(grid)
         time.sleep_ms(SleepingTime)
+        //println(living_cells.len)
         *living_cells = new_cycle(living_cells)
-        if living_cells.len == 0 { break }
+        //println(living_cells.len)
+        if living_cells.len == 0 { //println('break')
+        time.sleep_ms(5000)
+         break }
 
-        add_cells(mut grid, living_cells)
+        *grid = add_cells(living_cells)
     }
 
     C.endwin()
@@ -205,6 +232,12 @@ fn (p1 []Point) contains(p2 Point) bool {
 
 /* Debug functions */
 
+/*
+fn (p glfw.Pos) x() int {
+    return p.x
+}
+*/
+
 fn (pts []Point) str() string {
     mut res := ''
 
@@ -245,6 +278,32 @@ fn set_of_cells() []Point {
     return cells
 }
 
+fn random_set_of_cells(nbr int) []Point {
+    mut pts := []Point
+    //mut x := 0
+    //mut y := 0
+    mut pt := Point { x: 0, y: 0 }
+
+    rand.seed(time.now().uni)
+    for pts.len != nbr
+    {
+        pt.x = rand.next(MaxWidth - 1)
+        pt.y = rand.next(MaxHeight - 1)
+        //pt = Point { x: x, y: y }
+        //println('x : $pt.x; y : $pt.y')
+
+
+        if pts.contains(pt) || pt.is_out_of_bounds() { //println('continue')
+         continue }
+        pts << pt
+    }
+
+    //out_of_bounds(mut pts)
+    //println(pts.len)
+
+    return pts
+}
+
 // Existing CSV module
 fn read_csv(file_path string) []Point {
     mut cells := []Point
@@ -253,7 +312,6 @@ fn read_csv(file_path string) []Point {
 
     f := os.read_file(file_path) or {
         panic(err)
-        return []Point
     }
 
     points := f.split('\n')
@@ -275,14 +333,16 @@ fn out_of_bounds(cells mut []Point) {
 
     for i := 0; i != cells.len; i++ {
         c = cells[i]
-        if !(c.x >= 0 && c.x < MaxWidth && c.y >= 0 && c.y < MaxHeight) {
+        if c.is_out_of_bounds() {
             cells.delete(i)
             i--
         }
     }
 }
 
-
+fn (c Point) is_out_of_bounds() bool {
+    return !(c.x >= 0 && c.x < MaxWidth && c.y >= 0 && c.y < MaxHeight)
+}
 
 fn surrounding_cells(c Point) []Point {
     mut neighbours := []Point
@@ -307,6 +367,7 @@ fn new_cycle(living_cells []Point) []Point {
         count = all_living_neighbours(living_cells, cell).len
 
         if count == 2 || count == 3 {
+            //println('new cell')
             new_cells << cell
         }
     }
@@ -314,9 +375,11 @@ fn new_cycle(living_cells []Point) []Point {
     for dead_cell in all_dead_neighbours(living_cells) {
         if all_living_neighbours(living_cells, dead_cell).len == 3 {
             new_cells << dead_cell
+            //println('new dead cell')
         }
     }
 
+    //println('$new_cells.len')
     return new_cells
 }
 
@@ -353,18 +416,30 @@ fn init_grid() []array_int {
     return a
 }
 
-fn add_cells(grid mut []array_int, living_cells []Point) {
+fn add_cells(living_cells []Point) []array_int {
     /* mut is a pointer, so we need a * to deref it */
-    *grid = init_grid()
+    grid := init_grid()
     mut x := 0
     mut y := 0
 
     for cell in living_cells {
         x = cell.x
         y = cell.y
+        //println('x = $x; y = $y')
         /* x and y needs to be mutable ?! */
         grid[y][x] = 1
+        //println(grid[y][x])
     }
+    //println('right after')
+    $if debug {
+        for l in grid {
+            for c in l {
+                print('$c')
+            }
+            println('')
+        }
+    }
+return grid
 }
 
 
@@ -377,6 +452,8 @@ fn add_cells(grid mut []array_int, living_cells []Point) {
 
 fn print_grid(grid []array_int)
 {
+
+    //println('BBB')
     for i:=0; i != MaxWidth + 2; i++
     {
         C.mvprintw(0, i, '*')
