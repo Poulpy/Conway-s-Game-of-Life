@@ -3,12 +3,12 @@
 import time
 import os
 import gx
-import gl
+//import gl
 import gg
 import glfw
-import strings
+//import strings
 import rand
-import ui
+//import ui
 
 #flag -lncurses
 #include "curses.h"
@@ -166,7 +166,7 @@ fn (p1 []Point) - (p2 []Point) []Point {
     mut res := []Point
 
     for p in p1 {
-        if !p2.contains(p) {
+        if !(p in p2) {
             res << p
         }
     }
@@ -231,15 +231,6 @@ fn (p glfw.Pos) x() int {
 }
 */
 
-fn (pts []Point) str() string {
-    mut res := ''
-
-    for p in pts {
-        res += p.str()
-    }
-
-    return res
-}
 
 fn (p Point) str() string {
     return 'x : ' + p.x.str() + '; y : ' + p.y.str() + ';'
@@ -281,7 +272,7 @@ fn random_set_of_cells(nbr int) []Point {
         pt.x = rand.next(MaxWidth - 1)
         pt.y = rand.next(MaxHeight - 1)
 
-        if pts.contains(pt) || pt.is_out_of_bounds() { continue }
+        if pt in pts || pt.is_out_of_bounds() { continue }
         pts << pt
     }
 
