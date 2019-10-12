@@ -1,5 +1,25 @@
 module model
 
+import rand
+import time
+import os
+const (
+    MaxWidth   = 50
+    MaxHeight  = 20
+    MaxCells   = MaxWidth * MaxHeight
+
+)
+
+struct Point {
+    pub mut:
+    x int
+    y int
+}
+
+fn (p Point) str() string {
+    return 'x : ' + p.x.str() + '; y : ' + p.y.str() + ';'
+}
+
 
 pub fn (p1 Point) eql(p2 Point) bool {
     return p1.x == p2.x && p1.y == p2.y

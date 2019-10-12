@@ -1,4 +1,5 @@
 !*.v
 !*.csv
 !README*
+*.c
 

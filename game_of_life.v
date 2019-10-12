@@ -2,14 +2,12 @@ module main
 
 /* Imports */
 
-import time
 import os
 import gx
 //import gl
 import gg
 import glfw
 //import strings
-import rand
 //import ui
 
 import model
@@ -43,12 +41,6 @@ const (
 )
 
 /* Structs */
-
-struct Point {
-    mut:
-    x int
-    y int
-}
 
 /*struct Context
 {
@@ -160,10 +152,6 @@ fn (p glfw.Pos) x() int {
 }
 */
 
-
-fn (p Point) str() string {
-    return 'x : ' + p.x.str() + '; y : ' + p.y.str() + ';'
-}
 
 
 
