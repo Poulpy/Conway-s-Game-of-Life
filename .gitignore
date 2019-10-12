@@ -2,4 +2,5 @@
 !*.csv
 !README*
 *.c
-
+*swp
+*/*swp
