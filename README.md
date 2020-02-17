@@ -24,3 +24,8 @@ If you want your game to have a predefined set of cells, you can provide a CSV f
 v build game_of_life.v && ./game_of_life -f=cells.csv
 `
 
+### Dependencies
+
+V 0.1.25
+
+GLFW3 & Freetype [Install here](https://github.com/vlang/v)
