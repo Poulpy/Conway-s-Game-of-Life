@@ -14,6 +14,11 @@ import rand
 #include "curses.h"
 #include "ncurses.h"
 
+fn C.initscr()
+fn C.noecho()
+fn C.endwin()
+fn C.mvprintw(y int, x int, fmt byteptr, ...) int
+fn C.refresh()
 
 /* Constants */
 
@@ -107,7 +112,7 @@ fn has_file_arg() string {
 
 fn gui_game(grid mut []array_int, living_cells mut []Point)
 {
-    glfw.init()
+    glfw.init_glfw()
     mut game := gg.new_context(gg.Cfg {
         width: WindowWidth
         height: WindowHeight
@@ -232,7 +237,7 @@ fn (p glfw.Pos) x() int {
 */
 
 
-fn (p Point) str() string {
+pub fn (p Point) str() string {
     return 'x : ' + p.x.str() + '; y : ' + p.y.str() + ';'
 }
 
@@ -266,7 +271,7 @@ fn random_set_of_cells(nbr int) []Point {
     mut pts := []Point
     mut pt := Point { x: 0, y: 0 }
 
-    rand.seed(time.now().uni)
+    rand.seed(time.now().unix)
     for pts.len != nbr
     {
         pt.x = rand.next(MaxWidth - 1)
@@ -451,7 +456,8 @@ fn clear_window(g mut gg.GG, c gx.Color) {
 }
 
 
-fn borders(g mut gg.GG, space int, c gx.Color) {
+/*
+fn borders(g gg.GG, space int, c gx.Color) {
     upper_left   := Point { x: HorizontalBorder - space, y: VerticalBorder - space }
     upper_right  := Point { x: WindowWidth - HorizontalBorder + space, y: VerticalBorder - space }
     bottom_right := Point { x: WindowWidth - HorizontalBorder + space, y: WindowHeight - VerticalBorder + space }
@@ -462,6 +468,7 @@ fn borders(g mut gg.GG, space int, c gx.Color) {
     g.draw_line_c(upper_right.x, upper_right.y, bottom_right.x, bottom_right.y, c)
     g.draw_line_c(bottom_left.x, bottom_left.y, bottom_right.x, bottom_right.y, c)
 }
+*/
 
 
 fn print_cells(g mut gg.GG, grid []array_int)
@@ -471,7 +478,7 @@ fn print_cells(g mut gg.GG, grid []array_int)
     mut cell_size := 0
     mut cell_color := gx.White
 
-    borders(mut g, 2, gx.Black)
+    //borders(g, 2, gx.Black)
 
     for l, line in grid
     {
