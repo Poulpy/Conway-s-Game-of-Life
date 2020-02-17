@@ -78,8 +78,7 @@ fn main() {
 
     if has_console_arg() {
         cli_game(mut grid, mut living_cells)
-    }
-    else {
+    } else {
         /*context := &Context {}
         context.window := ui.new_window(ui.WinCfg {
             width: WindowWidth
@@ -94,17 +93,20 @@ fn main() {
         gui_game(mut grid, mut living_cells)
     }
 }
+
+// Check if there is a -c flag in the args
 fn has_console_arg() bool {
     println(os.args)
     return '-c' in os.args
 }
 
 // v run game_of_life.v -f=cells.csv
+// Check if there is a -f=<filename> flag
 fn has_file_arg() string {
     for arg in os.args {
-        if arg.substr(1, 2) == 'f' {
+        if arg[1..2] == 'f' {
             // Taking out the filename
-            return arg.substr(3, arg.len)
+            return arg[3..arg.len]
         }
     }
 
@@ -179,6 +181,7 @@ fn (p1 []Point) - (p2 []Point) []Point {
 
     return res
 }
+
 
 // Will be implemented in V
 fn (pts mut []Point) uniq() {
@@ -396,14 +399,9 @@ fn init_grid() []array_int {
 
 fn add_cells(living_cells []Point) []array_int {
     mut grid := init_grid()
-    mut x := 0
-    mut y := 0
 
     for cell in living_cells {
-        x = cell.x
-        y = cell.y
-        /* x and y needs to be mutable ?! */
-        grid[y][x] = 1
+        grid[cell.y][cell.x] = 1
     }
 
     return grid
