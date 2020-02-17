@@ -95,6 +95,7 @@ fn main() {
     }
 }
 fn has_console_arg() bool {
+    println(os.args)
     return '-c' in os.args
 }
 
@@ -126,7 +127,7 @@ fn gui_game(grid mut []array_int, living_cells mut []Point)
 
     for i := 0; i != 10; i++
     {
-        print_cells(mut game, grid)
+        print_cells(game, grid)
         time.sleep_ms(SleepingTime)
         *living_cells = new_cycle(living_cells)
         if living_cells.len == 0 { break }
@@ -287,8 +288,7 @@ fn random_set_of_cells(nbr int) []Point {
 // Existing CSV module
 fn read_csv(file_path string) []Point {
     mut cells := []Point
-    mut x := 0
-    mut y := 0
+    mut ints := []string
 
     f := os.read_file(file_path) or {
         panic(err)
@@ -297,10 +297,10 @@ fn read_csv(file_path string) []Point {
     points := f.split('\n')
 
     for p in points {
-        // p[0] returns the ASCII CODE, and not the char
-        x = p.substr(0, 1).int()// char 0
-        y = p.substr(2, 3).int()// char 2
-        cells << Point { x: x, y: y }
+        if p.len > 0 {
+            ints = p.split(',')
+            cells << Point { x: ints[0].int(), y: ints[1].int() }
+        }
     }
 
     out_of_bounds(mut cells)
@@ -471,7 +471,7 @@ fn borders(g gg.GG, space int, c gx.Color) {
 */
 
 
-fn print_cells(g mut gg.GG, grid []array_int)
+fn print_cells(g gg.GG, grid []array_int)
 {
     mut x := 0
     mut y := 0
