@@ -39,3 +39,13 @@ fn test_get_living_cells() {
     assert l.len == 1
 }
 
+fn test_is_born() {
+    mut g := model.grid_init()
+
+    c := model.Coord{row: 2, col: 3}
+    assert g.is_born(c) == true
+    c2 := model.Coord{row: -2, col: 3}
+    assert g.is_born(c2) == false
+    assert g.is_born(c) == true
+}
+
