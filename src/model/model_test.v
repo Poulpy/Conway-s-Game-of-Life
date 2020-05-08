@@ -2,7 +2,6 @@
 import model
 
 fn test_get_neighbours() {
-    //g := Grid{grid: [[false].repeat(total_columns)].repeat(total_rows)}
     mut c := model.Coord{row: 3, col: 2}
     mut n := model.get_neighbours(c)
     assert n.len == 8
@@ -27,3 +26,16 @@ fn test_get_neighbours() {
     n = model.get_neighbours(c)
     assert n.len == 5
 }
+
+fn test_get_living_cells() {
+    mut g := model.grid_init()
+
+    c := model.Coord{row: 2, col: 3}
+    mut l := g.get_living_cells()
+    assert l.len == 0
+    g.is_born(c)
+    l = g.get_living_cells()
+    println(l.len)
+    assert l.len == 1
+}
+
