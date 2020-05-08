@@ -16,9 +16,10 @@ pub const (
     total_rows = 30
 )
 
-//g := model.Grid{grid: [[false].repeat(model.total_columns)].repeat(model.total_rows)}
-// TODO repeat doesn't work
+// initialize the grid
+// TODO repeat doesn't work, it's a bug in version 0.1.27
 pub fn grid_init() Grid {
+    //g := model.Grid{grid: [[false].repeat(model.total_columns)].repeat(model.total_rows)}
     /*
     mut bb := []array_bool
     mut b := []bool
@@ -125,6 +126,7 @@ pub fn (g Grid) get_living_cells() []Coord {
     return living_cells
 }
 
+// get_dead_neighbours get all surrounding dead cells
 pub fn (g Grid) get_dead_neighbours(c Coord) []Coord {
     mut cells := get_neighbours(c)
 
@@ -138,7 +140,23 @@ pub fn (g Grid) get_dead_neighbours(c Coord) []Coord {
     return cells
 }
 
+// life_cycle a cell lives or dies
+pub fn (g mut Grid) life_cycle(c Coord) {
+    if g.lives(c) {
+        living_neighbours := g.get_living_neighbours(c)
+        if living_neighbours == 2 || living_neighbours == 3 {
+            // lives
+        } else {
+            g.kill(c)
+        }
+    } else {
+        if g.get_living_neighbours(c) == 3 {
+            g.is_born(c)
+        }
+    }
+}
 
+// get_living_neighbours get all surrounding living cells
 pub fn (g Grid) get_living_neighbours(c Coord) []Coord {
     cells := get_neighbours(c)
 
@@ -152,6 +170,7 @@ pub fn (g Grid) get_living_neighbours(c Coord) []Coord {
     return cells
 }
 
+// Checks if a cell lives
 pub fn (g Grid) lives(c Coord) bool {
     return g.grid[c.row][c.col] == true
 }
