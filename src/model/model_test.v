@@ -49,3 +49,14 @@ fn test_is_born() {
     assert g.is_born(c) == true
 }
 
+fn test_kill() {
+    mut g := model.grid_init()
+
+    c := model.Coord{row: 2, col: 3}
+    assert g.kill(c) == true
+    g.is_born(c)
+    assert g.kill(c) == true
+    c2 := model.Coord{row: -2, col: 3}
+    assert g.kill(c2) == false
+}
+

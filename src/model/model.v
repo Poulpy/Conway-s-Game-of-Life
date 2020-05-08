@@ -128,9 +128,14 @@ pub fn (g Grid) get_living_cells() []Coord {
 // raise : out of boundaries, cell already dead
 pub fn (g mut Grid) kill(c Coord) bool {
     if !c.within_boundaries() {
+        eprintln('Coordinates are out of bounds : (row, col) = ($c.row, $c.col)')
         return false
     } else {
-        g.grid[c.row][c.col] = false
+        if g.grid[c.row][c.col] == false {
+            eprintln('Cell is already dead')
+        } else {
+            g.grid[c.row][c.col] = false
+        }
         return true
     }
 }
