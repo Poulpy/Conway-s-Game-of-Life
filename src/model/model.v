@@ -125,6 +125,37 @@ pub fn (g Grid) get_living_cells() []Coord {
     return living_cells
 }
 
+pub fn (g Grid) get_dead_neighbours(c Coord) []Coord {
+    mut cells := get_neighbours(c)
+
+    for i := 0; i != cells.len; i++ {
+        if g.lives(cells[i]) {
+            cells.delete(i)
+            i--
+        }
+    }
+
+    return cells
+}
+
+
+pub fn (g Grid) get_living_neighbours(c Coord) []Coord {
+    cells := get_neighbours(c)
+
+    for i := 0; i != cells.len; i++ {
+        if !g.lives(cells[i]) {
+            cells.delete(i)
+            i--
+        }
+    }
+
+    return cells
+}
+
+pub fn (g Grid) lives(c Coord) bool {
+    return g.grid[c.row][c.col] == true
+}
+
 // raise : out of boundaries, cell already dead
 pub fn (g mut Grid) kill(c Coord) bool {
     if !c.within_boundaries() {

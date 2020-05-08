@@ -60,3 +60,15 @@ fn test_kill() {
     assert g.kill(c2) == false
 }
 
+fn test_get_living_neighbours() {
+    mut g := model.grid_init()
+
+    c := model.Coord{row: 2, col: 3}
+    c2 := model.Coord{row: 2, col: 4}
+    c3 := model.Coord{row: 1, col: 3}
+    g.is_born(c)
+    g.is_born(c2)
+    assert g.get_living_neighbours(c).len == 1
+    assert g.get_living_neighbours(c3).len == 2
+}
+
