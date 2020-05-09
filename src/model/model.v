@@ -156,6 +156,18 @@ pub fn (g mut Grid) life_cycle(c Coord) {
     }
 }
 
+// get_dead_cells_surrounding_live_cells returns all dead cells around
+// living cells
+pub fn (g Grid) get_dead_cells_surrounding_live_cells() Coord[] {
+    mut dead_cells := Coord[]{}
+
+    for living_cell in g.get_living_cells() {
+        append_uniq(dead_cells, g.get_dead_neighbours(living_cell))
+    }
+
+    return dead_cells
+}
+
 // get_living_neighbours get all surrounding living cells
 pub fn (g Grid) get_living_neighbours(c Coord) []Coord {
     cells := get_neighbours(c)
@@ -202,6 +214,15 @@ pub fn (g mut Grid) is_born(c Coord) bool {
             g.grid[c.row][c.col] = true
         }
         return true
+    }
+}
+
+// TODO parsing bug in version 0.1.27
+pub fn append_uniq(cells mut []Coord, cells_to_append []Coord) {
+    for cell in cells_to_append {
+        if !(cell in cells) {
+            cells << cell
+        }
     }
 }
 
